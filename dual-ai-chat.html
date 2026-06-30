@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DualMind — Claude × ChatGPT</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090F;
+  --bg2:#0E1019;
+  --bg3:#141624;
+  --border:#1E2235;
+  --claude:#8B5CF6;
+  --claude-dim:#6D28D9;
+  --claude-glow:rgba(139,92,246,0.15);
+  --gpt:#10A37F;
+  --gpt-dim:#0D8C6D;
+  --gpt-glow:rgba(16,163,127,0.15);
+  --white:#F1F3F9;
+  --slate:#6B7280;
+  --slate2:#9CA3AF;
+  --amber:#F59E0B;
+}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--bg);
+  color:var(--white);
+  font-family:'Inter',sans-serif;
+  display:flex;flex-direction:column;
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── TOPBAR ── */
+.topbar{
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.75rem 1.5rem;
+  background:rgba(8,9,15,0.9);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  z-index:50;
+}
+.logo{
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:1.15rem;letter-spacing:-0.5px;
+  display:flex;align-items:center;gap:.5rem;
+}
+.logo-claude{color:var(--claude)}
+.logo-x{color:var(--slate);font-weight:300}
+.logo-gpt{color:var(--gpt)}
+.topbar-actions{display:flex;align-items:center;gap:.75rem}
+.key-btn{
+  display:flex;align-items:center;gap:.4rem;
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--slate2);font-size:.78rem;font-weight:500;
+  padding:.4rem .85rem;border-radius:8px;cursor:pointer;
+  transition:border-color .2s,color .2s;font-family:'Inter',sans-serif;
+}
+.key-btn:hover{border-color:var(--gpt);color:var(--white)}
+.key-btn.active{border-color:var(--gpt);color:var(--gpt)}
+.clear-btn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--slate);font-size:.78rem;padding:.4rem .85rem;
+  border-radius:8px;cursor:pointer;transition:all .2s;
+  font-family:'Inter',sans-serif;
+}
+.clear-btn:hover{border-color:#EF4444;color:#EF4444}
+
+/* ── MAIN ── */
+.main{
+  flex:1;display:flex;flex-direction:column;
+  overflow:hidden;
+}
+
+/* ── API KEY MODAL ── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:16px;padding:2rem;width:90%;max-width:460px;
+}
+.modal h3{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.2rem;font-weight:700;margin-bottom:.5rem;
+}
+.modal p{color:var(--slate2);font-size:.85rem;line-height:1.6;margin-bottom:1.25rem}
+.modal input{
+  width:100%;background:var(--bg3);border:1px solid var(--border);
+  color:var(--white);padding:.65rem 1rem;border-radius:8px;
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  outline:none;transition:border-color .2s;margin-bottom:1rem;
+}
+.modal input:focus{border-color:var(--gpt)}
+.modal-actions{display:flex;gap:.75rem;justify-content:flex-end}
+.modal-cancel{
+  background:transparent;border:1px solid var(--border);color:var(--slate2);
+  padding:.5rem 1.1rem;border-radius:8px;cursor:pointer;font-size:.85rem;
+  font-family:'Inter',sans-serif;transition:all .2s;
+}
+.modal-cancel:hover{border-color:var(--white);color:var(--white)}
+.modal-save{
+  background:var(--gpt);color:#fff;border:none;
+  padding:.5rem 1.25rem;border-radius:8px;cursor:pointer;
+  font-weight:600;font-size:.85rem;font-family:'Inter',sans-serif;
+  transition:background .2s;
+}
+.modal-save:hover{background:var(--gpt-dim)}
+
+/* ── WELCOME ── */
+.welcome{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:2rem;text-align:center;
+  gap:1.5rem;
+}
+.welcome-icon{font-size:3.5rem}
+.welcome h2{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.6rem;font-weight:700;letter-spacing:-0.5px;
+}
+.welcome p{color:var(--slate2);font-size:.9rem;max-width:420px;line-height:1.7}
+.welcome-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem;margin-top:.5rem}
+.chip{
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--slate2);font-size:.8rem;padding:.4rem .9rem;
+  border-radius:100px;cursor:pointer;transition:all .2s;
+}
+.chip:hover{border-color:var(--claude);color:var(--white)}
+
+/* ── CHAT AREA ── */
+.chat-area{
+  flex:1;display:flex;overflow:hidden;
+}
+.chat-pane{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  border-right:1px solid var(--border);
+}
+.chat-pane:last-child{border-right:none}
+
+.pane-header{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:.6rem;
+  padding:.65rem 1.1rem;
+  border-bottom:1px solid var(--border);
+  font-size:.8rem;font-weight:600;
+}
+.pane-dot{width:8px;height:8px;border-radius:50%}
+.pane-claude .pane-header{background:rgba(139,92,246,0.06)}
+.pane-claude .pane-dot{background:var(--claude)}
+.pane-claude .pane-name{color:var(--claude)}
+.pane-gpt .pane-header{background:rgba(16,163,127,0.06)}
+.pane-gpt .pane-dot{background:var(--gpt)}
+.pane-gpt .pane-name{color:var(--gpt)}
+.pane-model{color:var(--slate);font-weight:400;font-size:.73rem;margin-left:auto;
+  font-family:'JetBrains Mono',monospace;}
+
+.pane-messages{
+  flex:1;overflow-y:auto;padding:1rem;
+  display:flex;flex-direction:column;gap:.85rem;
+}
+
+/* messages */
+.msg{display:flex;gap:.65rem;animation:msgIn .25s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg-user{flex-direction:row-reverse}
+.msg-avatar{
+  width:30px;height:30px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.85rem;font-weight:700;
+}
+.avatar-claude{background:rgba(139,92,246,0.2);color:var(--claude);font-family:'Space Grotesk',sans-serif}
+.avatar-gpt{background:rgba(16,163,127,0.2);color:var(--gpt);font-family:'Space Grotesk',sans-serif}
+.avatar-user{background:rgba(245,158,11,0.15);color:var(--amber)}
+
+.msg-bubble{
+  max-width:88%;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:.7rem 1rem;
+  font-size:.875rem;line-height:1.7;
+  color:var(--white);
+}
+.msg-user .msg-bubble{
+  background:rgba(245,158,11,0.08);
+  border-color:rgba(245,158,11,0.15);
+  color:var(--white);
+}
+.msg-bubble.claude-bubble{
+  border-color:rgba(139,92,246,0.2);
+  background:rgba(139,92,246,0.05);
+}
+.msg-bubble.gpt-bubble{
+  border-color:rgba(16,163,127,0.2);
+  background:rgba(16,163,127,0.05);
+}
+
+/* typing indicator */
+.typing{display:flex;align-items:center;gap:.35rem;padding:.5rem}
+.typing-dot{
+  width:7px;height:7px;border-radius:50%;
+  animation:typingBounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2){animation-delay:.15s}
+.typing-dot:nth-child(3){animation-delay:.3s}
+@keyframes typingBounce{
+  0%,80%,100%{transform:translateY(0);opacity:.4}
+  40%{transform:translateY(-6px);opacity:1}
+}
+.claude-typing .typing-dot{background:var(--claude)}
+.gpt-typing .typing-dot{background:var(--gpt)}
+
+/* error bubble */
+.error-bubble{
+  background:rgba(239,68,68,0.08);
+  border:1px solid rgba(239,68,68,0.2);
+  color:#FCA5A5;font-size:.82rem;
+  padding:.6rem .9rem;border-radius:10px;
+}
+
+/* ── INPUT BAR ── */
+.input-bar{
+  flex-shrink:0;
+  padding:.85rem 1.25rem;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  display:flex;align-items:flex-end;gap:.75rem;
+}
+.input-wrap{
+  flex:1;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;display:flex;align-items:flex-end;
+  padding:.5rem .75rem;gap:.5rem;transition:border-color .2s;
+}
+.input-wrap:focus-within{border-color:rgba(139,92,246,0.4)}
+textarea{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--white);font-family:'Inter',sans-serif;
+  font-size:.9rem;line-height:1.6;resize:none;
+  max-height:140px;
+}
+textarea::placeholder{color:var(--slate)}
+.send-btn{
+  width:38px;height:38px;border-radius:9px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--claude),var(--gpt));
+  color:#fff;font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:opacity .2s,transform .2s;
+}
+.send-btn:hover{opacity:.85;transform:scale(1.05)}
+.send-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+
+/* ── MODE TOGGLE ── */
+.mode-bar{
+  flex-shrink:0;
+  display:flex;align-items:center;gap:.5rem;
+  padding:.5rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);
+}
+.mode-label{font-size:.73rem;color:var(--slate);margin-right:.25rem}
+.mode-btn{
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--slate2);font-size:.75rem;padding:.3rem .75rem;
+  border-radius:100px;cursor:pointer;transition:all .2s;
+  font-family:'Inter',sans-serif;
+}
+.mode-btn.active-claude{border-color:var(--claude);color:var(--claude);background:rgba(139,92,246,0.1)}
+.mode-btn.active-gpt{border-color:var(--gpt);color:var(--gpt);background:rgba(16,163,127,0.1)}
+.mode-btn.active-both{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,0.1)}
+.mode-divider{width:1px;height:16px;background:var(--border);margin:0 .25rem}
+
+/* ── SYNTHESIS BAR ── */
+.synthesis{
+  display:none;
+  background:rgba(245,158,11,0.05);
+  border-top:1px solid rgba(245,158,11,0.15);
+  padding:.85rem 1.25rem;
+  font-size:.82rem;color:var(--slate2);
+  line-height:1.7;max-height:160px;overflow-y:auto;
+}
+.synthesis.visible{display:block}
+.synthesis-label{
+  color:var(--amber);font-weight:600;font-size:.75rem;
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:.4rem;
+}
+
+/* responsive */
+@media(max-width:640px){
+  .chat-area{flex-direction:column}
+  .chat-pane{border-right:none;border-bottom:1px solid var(--border)}
+  .chat-pane:last-child{border-bottom:none}
+  .topbar{padding:.6rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">
+    <span class="logo-claude">Claude</span>
+    <span class="logo-x">×</span>
+    <span class="logo-gpt">ChatGPT</span>
+    <span style="color:var(--slate);font-size:.7rem;font-weight:400;margin-left:.25rem">DualMind</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="key-btn" id="openKeyModal">🔑 OpenAI Key</button>
+    <button class="clear-btn" id="clearBtn">Clear chat</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="keyModal">
+  <div class="modal">
+    <h3>🔑 OpenAI API Key</h3>
+    <p>Your key is stored only in your browser memory and never sent anywhere except directly to OpenAI's API. It clears when you close the tab.</p>
+    <input type="password" id="keyInput" placeholder="sk-..." />
+    <div class="modal-actions">
+      <button class="modal-cancel" id="closeModal">Cancel</button>
+      <button class="modal-save" id="saveKey">Save Key</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main" id="mainArea">
+
+  <!-- WELCOME SCREEN -->
+  <div class="welcome" id="welcomeScreen">
+    <div class="welcome-icon">🧠</div>
+    <h2>Two AIs. One conversation.</h2>
+    <p>Ask anything and get simultaneous answers from <strong style="color:var(--claude)">Claude</strong> and <strong style="color:var(--gpt)">ChatGPT</strong> side by side. Compare perspectives, combine strengths.</p>
+    <div class="welcome-chips">
+      <div class="chip" onclick="sendPrompt('Explain quantum computing simply')">Explain quantum computing simply</div>
+      <div class="chip" onclick="sendPrompt('Write a Python function to reverse a string')">Python: reverse a string</div>
+      <div class="chip" onclick="sendPrompt('What are the pros and cons of freelancing?')">Pros & cons of freelancing</div>
+      <div class="chip" onclick="sendPrompt('Give me tips to learn a new programming language fast')">Learn a language fast</div>
+      <div class="chip" onclick="sendPrompt('What is the difference between SQL and NoSQL?')">SQL vs NoSQL</div>
+    </div>
+    <p style="font-size:.75rem;color:var(--slate);margin-top:.5rem">
+      💡 Claude works out of the box. Add your OpenAI key for ChatGPT responses.
+    </p>
+  </div>
+
+  <!-- CHAT VIEW (hidden until first message) -->
+  <div id="chatView" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+    <!-- mode bar -->
+    <div class="mode-bar">
+      <span class="mode-label">Mode:</span>
+      <button class="mode-btn active-both" id="modeBoth" onclick="setMode('both')">Both AIs</button>
+      <button class="mode-btn" id="modeClaude" onclick="setMode('claude')">Claude only</button>
+      <button class="mode-btn" id="modeGpt" onclick="setMode('gpt')">ChatGPT only</button>
+      <div class="mode-divider"></div>
+      <span style="font-size:.72rem;color:var(--slate);margin-left:.25rem" id="keyStatus">No OpenAI key</span>
+    </div>
+
+    <!-- two panes -->
+    <div class="chat-area" id="chatArea">
+      <!-- Claude -->
+      <div class="chat-pane pane-claude" id="claudePane">
+        <div class="pane-header">
+          <div class="pane-dot"></div>
+          <span class="pane-name">Claude</span>
+          <span class="pane-model">claude-sonnet-4-6</span>
+        </div>
+        <div class="pane-messages" id="claudeMsgs"></div>
+      </div>
+      <!-- GPT -->
+      <div class="chat-pane pane-gpt" id="gptPane">
+        <div class="pane-header">
+          <div class="pane-dot"></div>
+          <span class="pane-name">ChatGPT</span>
+          <span class="pane-model">gpt-4o</span>
+        </div>
+        <div class="pane-messages" id="gptMsgs"></div>
+      </div>
+    </div>
+
+    <!-- synthesis -->
+    <div class="synthesis" id="synthBar">
+      <div class="synthesis-label">⚡ Combined Insight</div>
+      <div id="synthText"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- INPUT BAR (always visible) -->
+<div class="input-bar">
+  <div class="input-wrap">
+    <textarea id="inputBox" rows="1" placeholder="Ask both AIs anything…" maxlength="2000"></textarea>
+  </div>
+  <button class="send-btn" id="sendBtn" title="Send">➤</button>
+</div>
+
+<script>
+// ── STATE ──
+let openaiKey = '';
+let mode = 'both';
+let claudeHistory = [];
+let gptHistory = [];
+let isLoading = false;
+
+// ── DOM ──
+const welcomeScreen = document.getElementById('welcomeScreen');
+const chatView      = document.getElementById('chatView');
+const claudeMsgs    = document.getElementById('claudeMsgs');
+const gptMsgs       = document.getElementById('gptMsgs');
+const inputBox      = document.getElementById('inputBox');
+const sendBtn       = document.getElementById('sendBtn');
+const keyStatus     = document.getElementById('keyStatus');
+const synthBar      = document.getElementById('synthBar');
+const synthText     = document.getElementById('synthText');
+const claudePane    = document.getElementById('claudePane');
+const gptPane       = document.getElementById('gptPane');
+
+// ── KEY MODAL ──
+document.getElementById('openKeyModal').onclick = () =>
+  document.getElementById('keyModal').classList.add('show');
+document.getElementById('closeModal').onclick = () =>
+  document.getElementById('keyModal').classList.remove('show');
+document.getElementById('saveKey').onclick = () => {
+  openaiKey = document.getElementById('keyInput').value.trim();
+  document.getElementById('keyModal').classList.remove('show');
+  if (openaiKey) {
+    keyStatus.textContent = '✓ OpenAI key set';
+    keyStatus.style.color = 'var(--gpt)';
+    document.getElementById('openKeyModal').classList.add('active');
+  }
+};
+
+// ── CLEAR ──
+document.getElementById('clearBtn').onclick = () => {
+  claudeMsgs.innerHTML = '';
+  gptMsgs.innerHTML = '';
+  claudeHistory = [];
+  gptHistory = [];
+  synthBar.classList.remove('visible');
+  chatView.style.display = 'none';
+  welcomeScreen.style.display = 'flex';
+  document.getElementById('mainArea').style.display = 'flex';
+  document.getElementById('mainArea').style.flexDirection = 'column';
+};
+
+// ── MODE ──
+function setMode(m) {
+  mode = m;
+  ['Both','Claude','Gpt'].forEach(n => {
+    const btn = document.getElementById('mode'+n);
+    btn.className = 'mode-btn';
+  });
+  if (m === 'both')   { document.getElementById('modeBoth').className   = 'mode-btn active-both';   claudePane.style.display='flex'; gptPane.style.display='flex'; }
+  if (m === 'claude') { document.getElementById('modeClaude').className = 'mode-btn active-claude'; claudePane.style.display='flex'; gptPane.style.display='none'; }
+  if (m === 'gpt')    { document.getElementById('modeGpt').className    = 'mode-btn active-gpt';    claudePane.style.display='none'; gptPane.style.display='flex'; }
+}
+
+// ── HELPERS ──
+function showChat() {
+  welcomeScreen.style.display = 'none';
+  chatView.style.display = 'flex';
+  document.getElementById('mainArea').style.flexDirection = 'column';
+}
+
+function appendMsg(container, role, text, type) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg' + (role === 'user' ? ' msg-user' : '');
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  if (role === 'user') {
+    avatar.className += ' avatar-user';
+    avatar.textContent = '👤';
+  } else if (type === 'claude') {
+    avatar.className += ' avatar-claude';
+    avatar.textContent = 'C';
+  } else {
+    avatar.className += ' avatar-gpt';
+    avatar.textContent = 'G';
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  if (role !== 'user') bubble.classList.add(type + '-bubble');
+  bubble.innerHTML = formatText(text);
+
+  wrap.appendChild(avatar);
+  wrap.appendChild(bubble);
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+  return bubble;
+}
+
+function formatText(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code style="background:rgba(255,255,255,0.08);padding:.1em .35em;border-radius:4px;font-family:\'JetBrains Mono\',monospace;font-size:.85em">$1</code>')
+    .replace(/\n/g,'<br>');
+}
+
+function addTyping(container, type) {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg';
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar ' + (type==='claude'?'avatar-claude':'avatar-gpt');
+  avatar.textContent = type==='claude'?'C':'G';
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble ' + type + '-bubble';
+  const typing = document.createElement('div');
+  typing.className = 'typing ' + type + '-typing';
+  typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  bubble.appendChild(typing);
+  wrap.appendChild(avatar);
+  wrap.appendChild(bubble);
+  container.appendChild(wrap);
+  container.scrollTop = container.scrollHeight;
+  return wrap;
+}
+
+function addError(container, msg) {
+  const div = document.createElement('div');
+  div.className = 'error-bubble';
+  div.textContent = '⚠ ' + msg;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+// ── CLAUDE API ──
+async function askClaude(userMsg) {
+  claudeHistory.push({ role: 'user', content: userMsg });
+  const typingEl = addTyping(claudeMsgs, 'claude');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: 'You are Claude, a helpful and thoughtful AI assistant. Give clear, concise, well-structured responses.',
+        messages: claudeHistory
+      })
+    });
+    const data = await res.json();
+    typingEl.remove();
+    const reply = data.content?.[0]?.text || 'No response received.';
+    claudeHistory.push({ role: 'assistant', content: reply });
+    appendMsg(claudeMsgs, 'assistant', reply, 'claude');
+    return reply;
+  } catch (e) {
+    typingEl.remove();
+    addError(claudeMsgs, 'Claude error: ' + e.message);
+    return null;
+  }
+}
+
+// ── OPENAI API ──
+async function askGPT(userMsg) {
+  if (!openaiKey) {
+    addError(gptMsgs, 'Add your OpenAI API key (top right) to enable ChatGPT responses.');
+    return null;
+  }
+  gptHistory.push({ role: 'user', content: userMsg });
+  const typingEl = addTyping(gptMsgs, 'gpt');
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + openaiKey
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        max_tokens: 1000,
+        messages: [
+          { role: 'system', content: 'You are ChatGPT, a helpful AI assistant. Give clear, concise, well-structured responses.' },
+          ...gptHistory
+        ]
+      })
+    });
+    const data = await res.json();
+    typingEl.remove();
+    if (data.error) { addError(gptMsgs, data.error.message); return null; }
+    const reply = data.choices?.[0]?.message?.content || 'No response.';
+    gptHistory.push({ role: 'assistant', content: reply });
+    appendMsg(gptMsgs, 'assistant', reply, 'gpt');
+    return reply;
+  } catch (e) {
+    typingEl.remove();
+    addError(gptMsgs, 'ChatGPT error: ' + e.message);
+    return null;
+  }
+}
+
+// ── SYNTHESIS (Claude summarizes both) ──
+async function synthesize(userMsg, claudeReply, gptReply) {
+  if (!claudeReply || !gptReply) return;
+  synthBar.classList.add('visible');
+  synthText.innerHTML = '<em style="color:var(--slate)">Generating combined insight…</em>';
+  try {
+    const prompt = `A user asked: "${userMsg}"
+
+Claude answered: "${claudeReply}"
+
+ChatGPT answered: "${gptReply}"
+
+In 2-3 sentences, synthesize both answers into a single combined insight. Highlight where they agree, any unique contribution from each, and the key takeaway.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const synthesis = data.content?.[0]?.text || '';
+    synthText.innerHTML = formatText(synthesis);
+  } catch(e) {
+    synthText.innerHTML = '<em style="color:var(--slate)">Could not generate synthesis.</em>';
+  }
+}
+
+// ── SEND ──
+async function sendPrompt(text) {
+  const msg = (text || inputBox.value).trim();
+  if (!msg || isLoading) return;
+
+  isLoading = true;
+  sendBtn.disabled = true;
+  inputBox.value = '';
+  inputBox.style.height = 'auto';
+
+  showChat();
+  synthBar.classList.remove('visible');
+
+  // Show user message in both panes
+  if (mode === 'both' || mode === 'claude') appendMsg(claudeMsgs, 'user', msg, 'claude');
+  if (mode === 'both' || mode === 'gpt')    appendMsg(gptMsgs,   'user', msg, 'gpt');
+
+  let claudeReply = null, gptReply = null;
+
+  if (mode === 'both') {
+    [claudeReply, gptReply] = await Promise.all([askClaude(msg), askGPT(msg)]);
+    await synthesize(msg, claudeReply, gptReply);
+  } else if (mode === 'claude') {
+    claudeReply = await askClaude(msg);
+  } else {
+    gptReply = await askGPT(msg);
+  }
+
+  isLoading = false;
+  sendBtn.disabled = false;
+  inputBox.focus();
+}
+
+// ── INPUT EVENTS ──
+sendBtn.onclick = () => sendPrompt();
+inputBox.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendPrompt(); }
+});
+inputBox.addEventListener('input', () => {
+  inputBox.style.height = 'auto';
+  inputBox.style.height = Math.min(inputBox.scrollHeight, 140) + 'px';
+});
+</script>
+</body>
+</html>

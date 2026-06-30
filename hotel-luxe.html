@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grand Palais Hotel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C97A;
+  --dark: #0D1117;
+  --dark2: #141B24;
+  --dark3: #1C2535;
+  --cream: #F5F0E8;
+  --cream2: #EDE8DC;
+  --white: #FFFFFF;
+  --text-muted: #8A96A8;
+  --green: #2D6A4F;
+  --orange: #FF6B1A;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--dark);
+  color: var(--cream);
+  overflow-x: hidden;
+}
+
+/* ─── LANGUAGE TOGGLE ─── */
+.lang-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: var(--gold);
+  color: var(--dark);
+  border: none;
+  padding: 8px 18px;
+  font-family: 'Jost', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all .3s;
+}
+.lang-btn:hover { background: var(--gold-light); }
+
+/* ─── OVERLAY MODALS ─── */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+}
+.overlay.active { display: flex; }
+
+.modal {
+  background: var(--dark2);
+  border: 1px solid rgba(201,168,76,0.3);
+  width: 90%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 48px 40px;
+  position: relative;
+  animation: slideUp .4s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px; right: 20px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 24px;
+  cursor: pointer;
+  transition: color .2s;
+}
+.modal-close:hover { color: var(--gold); }
+
+.modal h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.modal p { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+
+.form-group { margin-bottom: 20px; }
+
+.form-group label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  background: var(--dark3);
+  border: 1px solid rgba(201,168,76,0.2);
+  color: var(--cream);
+  padding: 14px 16px;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .3s;
+  appearance: none;
+}
+
+.form-group input:focus,
+.form-group select:focus { border-color: var(--gold); }
+
+.form-group select option { background: var(--dark2); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.btn-gold {
+  width: 100%;
+  background: var(--gold);
+  color: var(--dark);
+  border: none;
+  padding: 16px;
+  font-family: 'Jost', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+  margin-top: 8px;
+}
+.btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+.modal-switch {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.modal-switch a {
+  color: var(--gold);
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201,168,76,0.3);
+}
+.modal-switch a:hover { color: var(--gold-light); }
+
+/* Payment options */
+.payment-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.pay-opt {
+  border: 2px solid rgba(201,168,76,0.2);
+  padding: 16px;
+  cursor: pointer;
+  text-align: center;
+  transition: all .3s;
+  position: relative;
+}
+.pay-opt:hover, .pay-opt.selected {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.05);
+}
+.pay-opt .pay-icon { font-size: 28px; display: block; margin-bottom: 6px; }
+.pay-opt .pay-name { font-size: 12px; font-weight: 600; letter-spacing: 1px; }
+.pay-opt .pay-sub { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+.pay-opt.momo .pay-name { color: #FEC00F; }
+.pay-opt.orange .pay-name { color: var(--orange); }
+
+/* ─── NAVBAR ─── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 60px;
+  transition: all .4s;
+}
+nav.scrolled {
+  background: rgba(13,17,23,0.95);
+  padding: 16px 60px;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+}
+
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: 4px;
+  color: var(--gold);
+}
+.nav-logo span { font-style: italic; color: var(--cream); }
+
+.nav-links { display: flex; gap: 36px; align-items: center; }
+.nav-links a {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--cream);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: all .3s;
+  cursor: pointer;
+}
+.nav-links a:hover { opacity: 1; color: var(--gold); }
+
+.nav-actions { display: flex; gap: 12px; }
+.btn-nav {
+  padding: 10px 24px;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all .3s;
+}
+.btn-nav-outline {
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.5);
+  color: var(--gold);
+}
+.btn-nav-outline:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.btn-nav-fill { background: var(--gold); color: var(--dark); font-weight: 600; }
+.btn-nav-fill:hover { background: var(--gold-light); }
+
+/* User badge when logged in */
+.user-badge {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--cream);
+}
+.user-badge .avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+.user-badge.visible { display: flex; }
+
+/* ─── HERO ─── */
+#hero {
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0D1117 0%, #1a2535 50%, #0D1117 100%);
+}
+
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 60% 50% at 70% 50%, rgba(201,168,76,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 20% 80%, rgba(45,106,79,0.06) 0%, transparent 60%);
+}
+
+/* Decorative grid */
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.hero-img {
+  position: absolute;
+  right: -5%;
+  top: 0; bottom: 0;
+  width: 55%;
+  background: linear-gradient(135deg, #1a2e1a 0%, #0d1f1a 40%, #1a2535 100%);
+  clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
+  overflow: hidden;
+}
+
+.hero-img::before {
+  content: '🏨';
+  position: absolute;
+  font-size: 300px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-40%, -50%);
+  opacity: 0.04;
+}
+
+/* Floating building illustration */
+.hero-building {
+  position: absolute;
+  right: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.building-art {
+  width: 340px;
+  height: 420px;
+  position: relative;
+}
+
+/* CSS hotel building */
+.b-body {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 320px;
+  background: linear-gradient(180deg, #1e3a2f 0%, #162a22 100%);
+  border: 1px solid rgba(201,168,76,0.2);
+}
+.b-top {
+  position: absolute;
+  bottom: 320px; left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 80px;
+  background: linear-gradient(180deg, #25422f 0%, #1e3a2f 100%);
+  border: 1px solid rgba(201,168,76,0.2);
+}
+.b-peak {
+  position: absolute;
+  bottom: 400px; left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 40px solid transparent;
+  border-right: 40px solid transparent;
+  border-bottom: 30px solid #C9A84C;
+}
+.b-windows {
+  position: absolute;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 180px;
+}
+.b-win {
+  width: 32px; height: 40px;
+  background: rgba(201,168,76,0.15);
+  border: 1px solid rgba(201,168,76,0.3);
+  position: relative;
+  overflow: hidden;
+}
+.b-win.lit { background: rgba(201,168,76,0.4); animation: flicker 3s infinite; }
+.b-win::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 12px;
+  background: rgba(201,168,76,0.2);
+}
+@keyframes flicker {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.b-entrance {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 48px; height: 64px;
+  background: rgba(201,168,76,0.15);
+  border: 1px solid rgba(201,168,76,0.4);
+  border-bottom: none;
+}
+.b-canopy {
+  position: absolute;
+  bottom: 64px; left: 50%;
+  transform: translateX(-50%);
+  width: 80px; height: 8px;
+  background: var(--gold);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 0 60px;
+  max-width: 560px;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 24px;
+}
+.hero-tag::before {
+  content: '';
+  width: 40px; height: 1px;
+  background: var(--gold);
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--cream);
+  margin-bottom: 24px;
+}
+.hero-title em {
+  font-style: italic;
+  color: var(--gold);
+  display: block;
+}
+
+.hero-desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 40px;
+  max-width: 420px;
+}
+
+.hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+
+.btn-hero-primary {
+  background: var(--gold);
+  color: var(--dark);
+  border: none;
+  padding: 18px 40px;
+  font-family: 'Jost', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+}
+.btn-hero-primary:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(201,168,76,0.25); }
+
+.btn-hero-ghost {
+  background: transparent;
+  color: var(--cream);
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 18px 40px;
+  font-family: 'Jost', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+}
+.btn-hero-ghost:hover { border-color: var(--cream); background: rgba(255,255,255,0.05); }
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.stat-item { }
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--gold);
+}
+.stat-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ─── SECTIONS ─── */
+section { padding: 100px 60px; }
+
+.section-tag {
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.section-tag::after {
+  content: '';
+  width: 40px; height: 1px;
+  background: var(--gold);
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--cream);
+  margin-bottom: 16px;
+}
+
+.section-sub {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.8;
+  max-width: 520px;
+  margin-bottom: 60px;
+}
+
+/* ─── QUICK SEARCH ─── */
+#quick-search {
+  background: var(--dark2);
+  padding: 0;
+  border-top: 1px solid rgba(201,168,76,0.1);
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+}
+
+.search-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 0;
+}
+
+.search-field {
+  padding: 32px 32px;
+  border-right: 1px solid rgba(201,168,76,0.1);
+}
+.search-field:last-of-type { border-right: none; }
+
+.search-field label {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.search-field input,
+.search-field select {
+  background: none;
+  border: none;
+  color: var(--cream);
+  font-family: 'Jost', sans-serif;
+  font-size: 15px;
+  outline: none;
+  width: 100%;
+}
+.search-field input::placeholder { color: var(--text-muted); }
+.search-field select option { background: var(--dark2); }
+
+.btn-search {
+  background: var(--gold);
+  color: var(--dark);
+  border: none;
+  padding: 0 48px;
+  font-family: 'Jost', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+  white-space: nowrap;
+}
+.btn-search:hover { background: var(--gold-light); }
+
+/* ─── ROOMS ─── */
+#rooms { background: var(--dark); }
+
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.room-card {
+  background: var(--dark2);
+  border: 1px solid rgba(201,168,76,0.1);
+  overflow: hidden;
+  transition: all .4s;
+  cursor: pointer;
+}
+.room-card:hover {
+  border-color: rgba(201,168,76,0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.room-img {
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+}
+
+.room-bg {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+  transition: transform .4s;
+}
+.room-card:hover .room-bg { transform: scale(1.05); }
+
+.room-badge {
+  position: absolute;
+  top: 16px; left: 16px;
+  background: var(--gold);
+  color: var(--dark);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 5px 12px;
+  text-transform: uppercase;
+}
+
+.room-info { padding: 28px; }
+
+.room-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 8px;
+}
+
+.room-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.room-features {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.feat {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.feat span { color: var(--gold); }
+
+.room-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.room-price { }
+.price-from { font-size: 10px; letter-spacing: 1px; color: var(--text-muted); }
+.price-val {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--gold);
+}
+.price-night { font-size: 11px; color: var(--text-muted); }
+
+.btn-reserve {
+  background: transparent;
+  border: 1px solid rgba(201,168,76,0.4);
+  color: var(--gold);
+  padding: 10px 20px;
+  font-family: 'Jost', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .3s;
+}
+.btn-reserve:hover { background: var(--gold); color: var(--dark); }
+
+/* ─── SERVICES ─── */
+#services { background: var(--dark2); }
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.service-card {
+  background: var(--dark3);
+  border: 1px solid rgba(201,168,76,0.08);
+  padding: 36px 28px;
+  transition: all .3s;
+  position: relative;
+  overflow: hidden;
+}
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transition: transform .3s;
+}
+.service-card:hover::before { transform: scaleX(1); }
+.service-card:hover { border-color: rgba(201,168,76,0.25); transform: translateY(-3px); }
+
+.service-icon {
+  font-size: 36px;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.service-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--cream);
+  margin-bottom: 10px;
+}
+
+.service-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+
+/* ─── TESTIMONIALS ─── */
+#testimonials {
+  background: var(--dark);
+  text-align: center;
+}
+
+.testi-container {
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.quote-mark {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 120px;
+  color: rgba(201,168,76,0.15);
+  line-height: 0.5;
+  display: block;
+  margin-bottom: 40px;
+}
+
+.testi-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--cream);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.testi-author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.author-avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--green));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.author-info .name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cream);
+}
+.author-info .role {
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+}
+.stars { color: var(--gold); font-size: 14px; margin-bottom: 4px; }
+
+/* ─── CONTACT ─── */
+#contact {
+  background: var(--dark2);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.contact-info .section-title { margin-bottom: 24px; }
+
+.contact-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.contact-icon {
+  width: 44px; height: 44px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.contact-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.contact-text strong { color: var(--cream); display: block; margin-bottom: 3px; font-size: 14px; }
+
+.contact-form { }
+
+/* ─── FOOTER ─── */
+footer {
+  background: #080C10;
+  padding: 60px 60px 30px;
+  border-top: 1px solid rgba(201,168,76,0.1);
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.footer-brand .logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+.footer-brand p { font-size: 13px; color: var(--text-muted); line-height: 1.7; max-width: 260px; }
+
+.footer-col h4 {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 10px; }
+.footer-col ul li a {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s;
+}
+.footer-col ul li a:hover { color: var(--cream); }
+
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-bottom p { font-size: 12px; color: var(--text-muted); }
+
+/* ─── RESERVATION FLOW ─── */
+.steps {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+.step {
+  flex: 1;
+  height: 3px;
+  background: rgba(201,168,76,0.2);
+  border-radius: 2px;
+  transition: background .3s;
+}
+.step.done { background: var(--gold); }
+
+.room-summary {
+  background: var(--dark3);
+  border: 1px solid rgba(201,168,76,0.15);
+  padding: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.room-summary .room-icon { font-size: 32px; }
+.room-summary .room-detail { flex: 1; }
+.room-summary .room-detail strong { font-size: 16px; color: var(--cream); display: block; }
+.room-summary .room-detail span { font-size: 12px; color: var(--text-muted); }
+.room-summary .room-price { text-align: right; }
+.room-summary .room-price .price { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--gold); }
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: var(--dark2);
+  border-left: 3px solid var(--gold);
+  padding: 16px 24px;
+  z-index: 9999;
+  font-size: 13px;
+  color: var(--cream);
+  transform: translateX(200%);
+  transition: transform .4s;
+  max-width: 320px;
+}
+.toast.show { transform: translateX(0); }
+.toast.success { border-color: #2D6A4F; }
+.toast.error { border-color: #c0392b; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1024px) {
+  nav { padding: 20px 30px; }
+  section { padding: 70px 30px; }
+  .rooms-grid { grid-template-columns: repeat(2, 1fr); }
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .search-bar { grid-template-columns: 1fr 1fr; }
+  .btn-search { grid-column: 1/-1; padding: 20px; }
+  #contact { grid-template-columns: 1fr; gap: 40px; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; }
+  .nav-links { display: none; }
+  section { padding: 60px 20px; }
+  .hero-img { display: none; }
+  .hero-content { padding: 0 20px; max-width: 100%; }
+  .rooms-grid { grid-template-columns: 1fr; }
+  .services-grid { grid-template-columns: 1fr 1fr; }
+  .search-bar { grid-template-columns: 1fr; }
+  .search-field { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.1); }
+  .hero-stats { gap: 20px; }
+  footer { padding: 40px 20px 20px; }
+  .footer-top { grid-template-columns: 1fr; }
+  .modal { padding: 32px 24px; }
+  .form-row { grid-template-columns: 1fr; }
+  .lang-btn { top: auto; bottom: 20px; }
+}
+
+/* Animate on scroll (simple) */
+.fade-in { opacity: 0; transform: translateY(20px); transition: all .6s; }
+.fade-in.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- Language Toggle -->
+<button class="lang-btn" id="langBtn" onclick="toggleLang()">EN / FR</button>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- LOGIN -->
+<div class="overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+    <h2 data-fr="Connexion" data-en="Sign In">Connexion</h2>
+    <p data-fr="Bienvenue, accédez à votre espace personnel." data-en="Welcome back, access your personal space.">Bienvenue, accédez à votre espace personnel.</p>
+    <div class="form-group">
+      <label data-fr="Adresse Email" data-en="Email Address">Adresse Email</label>
+      <input type="email" id="loginEmail" placeholder="vous@exemple.com">
+    </div>
+    <div class="form-group">
+      <label data-fr="Mot de Passe" data-en="Password">Mot de Passe</label>
+      <input type="password" id="loginPwd" placeholder="••••••••">
+    </div>
+    <button class="btn-gold" onclick="doLogin()" data-fr="SE CONNECTER" data-en="SIGN IN">SE CONNECTER</button>
+    <div class="modal-switch">
+      <span data-fr="Pas encore de compte ?" data-en="No account yet ?">Pas encore de compte ?</span>
+      <a onclick="switchModal('loginModal','registerModal')" data-fr=" S'inscrire" data-en=" Register"> S'inscrire</a>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="overlay" id="registerModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('registerModal')">✕</button>
+    <h2 data-fr="Inscription" data-en="Create Account">Inscription</h2>
+    <p data-fr="Rejoignez notre famille de voyageurs d'élite." data-en="Join our family of elite travelers.">Rejoignez notre famille de voyageurs d'élite.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label data-fr="Prénom" data-en="First Name">Prénom</label>
+        <input type="text" id="regFirst" placeholder="Jean">
+      </div>
+      <div class="form-group">
+        <label data-fr="Nom" data-en="Last Name">Nom</label>
+        <input type="text" id="regLast" placeholder="Dupont">
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-fr="Email" data-en="Email">Email</label>
+      <input type="email" id="regEmail" placeholder="vous@exemple.com">
+    </div>
+    <div class="form-group">
+      <label data-fr="Téléphone" data-en="Phone">Téléphone</label>
+      <input type="tel" id="regPhone" placeholder="+237 6XX XXX XXX">
+    </div>
+    <div class="form-group">
+      <label data-fr="Mot de Passe" data-en="Password">Mot de Passe</label>
+      <input type="password" id="regPwd" placeholder="••••••••">
+    </div>
+    <button class="btn-gold" onclick="doRegister()" data-fr="CRÉER MON COMPTE" data-en="CREATE ACCOUNT">CRÉER MON COMPTE</button>
+    <div class="modal-switch">
+      <span data-fr="Déjà inscrit ?" data-en="Already registered ?">Déjà inscrit ?</span>
+      <a onclick="switchModal('registerModal','loginModal')" data-fr=" Se connecter" data-en=" Sign In"> Se connecter</a>
+    </div>
+  </div>
+</div>
+
+<!-- RESERVATION -->
+<div class="overlay" id="reserveModal">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeModal('reserveModal')">✕</button>
+    
+    <!-- Step indicators -->
+    <div class="steps">
+      <div class="step done" id="s1"></div>
+      <div class="step" id="s2"></div>
+      <div class="step" id="s3"></div>
+    </div>
+
+    <!-- Step 1: Room + dates -->
+    <div id="reserveStep1">
+      <h2 data-fr="Réserver" data-en="Reserve">Réserver</h2>
+      <p data-fr="Complétez vos informations de séjour." data-en="Fill in your stay details.">Complétez vos informations de séjour.</p>
+      
+      <div class="room-summary" id="roomSummary">
+        <div class="room-icon" id="rIcon">🛏️</div>
+        <div class="room-detail">
+          <strong id="rName">Chambre Standard</strong>
+          <span id="rType">Vue Jardin</span>
+        </div>
+        <div class="room-price">
+          <div class="price" id="rPrice">35 000 XAF</div>
+          <div style="font-size:11px;color:var(--text-muted)" data-fr="/ nuit" data-en="/ night">/ nuit</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label data-fr="Arrivée" data-en="Check-in">Arrivée</label>
+          <input type="date" id="checkIn">
+        </div>
+        <div class="form-group">
+          <label data-fr="Départ" data-en="Check-out">Départ</label>
+          <input type="date" id="checkOut">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-fr="Adultes" data-en="Adults">Adultes</label>
+          <select id="adults">
+            <option>1</option><option selected>2</option><option>3</option><option>4</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label data-fr="Enfants" data-en="Children">Enfants</label>
+          <select id="children">
+            <option selected>0</option><option>1</option><option>2</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-fr="Demandes Spéciales" data-en="Special Requests">Demandes Spéciales</label>
+        <textarea id="special" rows="2" style="width:100%;background:var(--dark3);border:1px solid rgba(201,168,76,0.2);color:var(--cream);padding:14px;font-family:'Jost',sans-serif;font-size:14px;outline:none;resize:none;" placeholder="Chambre non-fumeur, lit bébé..."></textarea>
+      </div>
+      <button class="btn-gold" onclick="reserveStep2()" data-fr="CONTINUER → PAIEMENT" data-en="CONTINUE → PAYMENT">CONTINUER → PAIEMENT</button>
+    </div>
+
+    <!-- Step 2: Payment -->
+    <div id="reserveStep2" style="display:none">
+      <h2 data-fr="Paiement" data-en="Payment">Paiement</h2>
+      <p data-fr="Choisissez votre mode de paiement." data-en="Choose your payment method.">Choisissez votre mode de paiement.</p>
+
+      <div class="payment-options">
+        <div class="pay-opt momo selected" id="momoOpt" onclick="selectPay('momo')">
+          <span class="pay-icon">📱</span>
+          <div class="pay-name">MTN MoMo</div>
+          <div class="pay-sub">Mobile Money</div>
+        </div>
+        <div class="pay-opt orange" id="orangeOpt" onclick="selectPay('orange')">
+          <span class="pay-icon">🟠</span>
+          <div class="pay-name">Orange Money</div>
+          <div class="pay-sub">Orange CM</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label data-fr="Numéro Mobile Money" data-en="Mobile Money Number">Numéro Mobile Money</label>
+        <input type="tel" id="payPhone" placeholder="6XX XXX XXX">
+      </div>
+
+      <div id="payTotal" style="background:var(--dark3);padding:20px;margin-bottom:20px;border:1px solid rgba(201,168,76,0.15)">
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-bottom:8px">
+          <span data-fr="Sous-total" data-en="Subtotal">Sous-total</span>
+          <span id="subTotal">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-bottom:12px">
+          <span data-fr="Taxes (19.25%)" data-en="Taxes (19.25%)">Taxes (19.25%)</span>
+          <span id="taxAmt">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--gold)">
+          <span data-fr="Total" data-en="Total">Total</span>
+          <span id="totalAmt">—</span>
+        </div>
+      </div>
+
+      <button class="btn-gold" onclick="reserveStep3()" data-fr="CONFIRMER ET PAYER" data-en="CONFIRM & PAY">CONFIRMER ET PAYER</button>
+      <button onclick="backStep(1)" style="width:100%;margin-top:8px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);padding:12px;cursor:pointer;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:2px" data-fr="← RETOUR" data-en="← BACK">← RETOUR</button>
+    </div>
+
+    <!-- Step 3: Confirmation -->
+    <div id="reserveStep3" style="display:none;text-align:center;padding:20px 0">
+      <div style="font-size:64px;margin-bottom:24px">✅</div>
+      <h2 style="color:var(--cream)" data-fr="Réservation Confirmée !" data-en="Booking Confirmed!">Réservation Confirmée !</h2>
+      <p style="margin:16px 0 8px" data-fr="Votre séjour a été réservé avec succès." data-en="Your stay has been successfully booked.">Votre séjour a été réservé avec succès.</p>
+      <p id="confirmRef" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-bottom:32px"></p>
+      <button class="btn-gold" onclick="closeModal('reserveModal')" data-fr="FERMER" data-en="CLOSE">FERMER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav id="navbar">
+  <div class="nav-logo">GRAND <span>Palais</span></div>
+  <div class="nav-links">
+    <a onclick="scrollTo('#rooms')" data-fr="Chambres" data-en="Rooms">Chambres</a>
+    <a onclick="scrollTo('#services')" data-fr="Services" data-en="Services">Services</a>
+    <a onclick="scrollTo('#testimonials')" data-fr="Avis" data-en="Reviews">Avis</a>
+    <a onclick="scrollTo('#contact')" data-fr="Contact" data-en="Contact">Contact</a>
+  </div>
+  <div class="nav-actions">
+    <div class="user-badge" id="userBadge">
+      <div class="avatar" id="userAvatar">J</div>
+      <span id="userName">Jean</span>
+    </div>
+    <button class="btn-nav btn-nav-outline" id="loginBtn" onclick="openModal('loginModal')" data-fr="Connexion" data-en="Sign In">Connexion</button>
+    <button class="btn-nav btn-nav-fill" id="registerBtn" onclick="openModal('registerModal')" data-fr="S'inscrire" data-en="Register">S'inscrire</button>
+    <button class="btn-nav btn-nav-outline" id="logoutBtn" onclick="doLogout()" style="display:none" data-fr="Déconnexion" data-en="Logout">Déconnexion</button>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  
+  <!-- Decorative building -->
+  <div class="hero-img">
+    <div class="hero-building">
+      <div class="building-art">
+        <div class="b-body">
+          <div class="b-windows">
+            <div class="b-win lit"></div><div class="b-win"></div><div class="b-win lit"></div><div class="b-win"></div>
+            <div class="b-win"></div><div class="b-win lit"></div><div class="b-win"></div><div class="b-win lit"></div>
+            <div class="b-win lit"></div><div class="b-win"></div><div class="b-win lit"></div><div class="b-win"></div>
+            <div class="b-win"></div><div class="b-win lit"></div><div class="b-win"></div><div class="b-win lit"></div>
+          </div>
+          <div class="b-entrance"></div>
+          <div class="b-canopy"></div>
+        </div>
+        <div class="b-top"></div>
+        <div class="b-peak"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-tag" data-fr="Hôtel 5 Étoiles — Yaoundé, Cameroun" data-en="5-Star Hotel — Yaoundé, Cameroon">Hôtel 5 Étoiles — Yaoundé, Cameroun</div>
+    <h1 class="hero-title">
+      <span data-fr="L'Art de" data-en="The Art of">L'Art de</span>
+      <em data-fr="Vivre" data-en="Living">Vivre</em>
+      <span data-fr="l'Excellence" data-en="Excellence">l'Excellence</span>
+    </h1>
+    <p class="hero-desc" data-fr="Découvrez un séjour d'exception où luxe, confort et hospitalité authentique se rencontrent au cœur de la capitale camerounaise." data-en="Discover an exceptional stay where luxury, comfort and authentic hospitality meet in the heart of the Cameroonian capital.">Découvrez un séjour d'exception où luxe, confort et hospitalité authentique se rencontrent au cœur de la capitale camerounaise.</p>
+    <div class="hero-actions">
+      <button class="btn-hero-primary" onclick="scrollTo('#rooms')" data-fr="EXPLORER LES CHAMBRES" data-en="EXPLORE ROOMS">EXPLORER LES CHAMBRES</button>
+      <button class="btn-hero-ghost" onclick="scrollTo('#services')" data-fr="NOS SERVICES" data-en="OUR SERVICES">NOS SERVICES</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">48</div>
+        <div class="stat-label" data-fr="Chambres de luxe" data-en="Luxury rooms">Chambres de luxe</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">12</div>
+        <div class="stat-label" data-fr="Années d'excellence" data-en="Years of excellence">Années d'excellence</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">4.9</div>
+        <div class="stat-label" data-fr="Note clients" data-en="Guest rating">Note clients</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ QUICK SEARCH ═══════════════ -->
+<div id="quick-search">
+  <div class="search-bar">
+    <div class="search-field">
+      <label data-fr="ARRIVÉE" data-en="CHECK-IN">ARRIVÉE</label>
+      <input type="date" id="qCheckIn">
+    </div>
+    <div class="search-field">
+      <label data-fr="DÉPART" data-en="CHECK-OUT">DÉPART</label>
+      <input type="date" id="qCheckOut">
+    </div>
+    <div class="search-field">
+      <label data-fr="VOYAGEURS" data-en="GUESTS">VOYAGEURS</label>
+      <select id="qGuests">
+        <option value="1">1 personne</option>
+        <option value="2" selected>2 personnes</option>
+        <option value="3">3 personnes</option>
+        <option value="4">4 personnes</option>
+        <option value="5">5+ personnes</option>
+      </select>
+    </div>
+    <button class="btn-search" onclick="doSearch()" data-fr="RECHERCHER" data-en="SEARCH">RECHERCHER</button>
+  </div>
+</div>
+
+<!-- ═══════════════ ROOMS ═══════════════ -->
+<section id="rooms">
+  <div class="section-tag" data-fr="Nos Hébergements" data-en="Our Accommodations">Nos Hébergements</div>
+  <h2 class="section-title" data-fr="Chambres & Suites" data-en="Rooms & Suites">Chambres & Suites</h2>
+  <p class="section-sub" data-fr="Des espaces de vie soigneusement conçus pour votre bien-être, alliant design contemporain et touches africaines authentiques." data-en="Carefully designed living spaces for your well-being, blending contemporary design with authentic African touches.">Des espaces de vie soigneusement conçus pour votre bien-être, alliant design contemporain et touches africaines authentiques.</p>
+
+  <div class="rooms-grid">
+    
+    <div class="room-card fade-in">
+      <div class="room-img">
+        <div class="room-bg" style="background:linear-gradient(135deg,#1a2e22,#0d1a15)">🛏️</div>
+        <div class="room-badge" data-fr="Disponible" data-en="Available">Disponible</div>
+      </div>
+      <div class="room-info">
+        <div class="room-name" data-fr="Chambre Standard" data-en="Standard Room">Chambre Standard</div>
+        <p class="room-desc" data-fr="Confort moderne avec vue sur le jardin tropical. Idéale pour un séjour d'affaires ou de loisirs." data-en="Modern comfort with tropical garden view. Ideal for business or leisure stays.">Confort moderne avec vue sur le jardin tropical. Idéale pour un séjour d'affaires ou de loisirs.</p>
+        <div class="room-features">
+          <span class="feat"><span>🛏️</span> <span data-fr="Lit double" data-en="Double bed">Lit double</span></span>
+          <span class="feat"><span>📶</span> WiFi</span>
+          <span class="feat"><span>❄️</span> <span data-fr="Clim" data-en="AC">Clim</span></span>
+          <span class="feat"><span>📺</span> TV</span>
+        </div>
+        <div class="room-footer">
+          <div class="room-price">
+            <div class="price-from" data-fr="À partir de" data-en="From">À partir de</div>
+            <div class="price-val">35 000</div>
+            <div class="price-night">XAF / <span data-fr="nuit" data-en="night">nuit</span></div>
+          </div>
+          <button class="btn-reserve" onclick="openReserve('🛏️','Chambre Standard','Vue Jardin','35000')" data-fr="RÉSERVER" data-en="BOOK">RÉSERVER</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-card fade-in">
+      <div class="room-img">
+        <div class="room-bg" style="background:linear-gradient(135deg,#2a1f0d,#1a1508)">🛎️</div>
+        <div class="room-badge" style="background:var(--green);color:white" data-fr="Populaire" data-en="Popular">Populaire</div>
+      </div>
+      <div class="room-info">
+        <div class="room-name" data-fr="Chambre Supérieure" data-en="Superior Room">Chambre Supérieure</div>
+        <p class="room-desc" data-fr="Espace raffiné avec balcon privé et vue panoramique sur la ville. Service en chambre 24h/24." data-en="Refined space with private balcony and panoramic city view. 24/7 room service.">Espace raffiné avec balcon privé et vue panoramique sur la ville. Service en chambre 24h/24.</p>
+        <div class="room-features">
+          <span class="feat"><span>🛏️</span> <span data-fr="Lit King" data-en="King bed">Lit King</span></span>
+          <span class="feat"><span>🛁</span> <span data-fr="Baignoire" data-en="Bathtub">Baignoire</span></span>
+          <span class="feat"><span>🏙️</span> <span data-fr="Vue ville" data-en="City view">Vue ville</span></span>
+          <span class="feat"><span>🍳</span> <span data-fr="Petit-déj" data-en="Breakfast">Petit-déj</span></span>
+        </div>
+        <div class="room-footer">
+          <div class="room-price">
+            <div class="price-from" data-fr="À partir de" data-en="From">À partir de</div>
+            <div class="price-val">65 000</div>
+            <div class="price-night">XAF / <span data-fr="nuit" data-en="night">nuit</span></div>
+          </div>
+          <button class="btn-reserve" onclick="openReserve('🛎️','Chambre Supérieure','Vue Panoramique','65000')" data-fr="RÉSERVER" data-en="BOOK">RÉSERVER</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-card fade-in">
+      <div class="room-img">
+        <div class="room-bg" style="background:linear-gradient(135deg,#1a0d1a,#0d0810)">👑</div>
+        <div class="room-badge" style="background:linear-gradient(90deg,#C9A84C,#E8C97A);color:#0D1117" data-fr="Suite Prestige" data-en="Prestige Suite">Suite Prestige</div>
+      </div>
+      <div class="room-info">
+        <div class="room-name" data-fr="Suite Présidentielle" data-en="Presidential Suite">Suite Présidentielle</div>
+        <p class="room-desc" data-fr="Le summum du luxe. Salon privé, jacuzzi, terrasse panoramique et majordome dédié 24h/24." data-en="The pinnacle of luxury. Private lounge, jacuzzi, panoramic terrace and dedicated butler 24/7.">Le summum du luxe. Salon privé, jacuzzi, terrasse panoramique et majordome dédié 24h/24.</p>
+        <div class="room-features">
+          <span class="feat"><span>👑</span> <span data-fr="Suite VIP" data-en="VIP Suite">Suite VIP</span></span>
+          <span class="feat"><span>🛁</span> Jacuzzi</span>
+          <span class="feat"><span>🍽️</span> <span data-fr="Service privé" data-en="Private dining">Service privé</span></span>
+          <span class="feat"><span>🌅</span> Penthouse</span>
+        </div>
+        <div class="room-footer">
+          <div class="room-price">
+            <div class="price-from" data-fr="À partir de" data-en="From">À partir de</div>
+            <div class="price-val">200 000</div>
+            <div class="price-night">XAF / <span data-fr="nuit" data-en="night">nuit</span></div>
+          </div>
+          <button class="btn-reserve" onclick="openReserve('👑','Suite Présidentielle','Penthouse Vue 360°','200000')" data-fr="RÉSERVER" data-en="BOOK">RÉSERVER</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-card fade-in">
+      <div class="room-img">
+        <div class="room-bg" style="background:linear-gradient(135deg,#0d1a2e,#080f1a)">🏠</div>
+        <div class="room-badge" data-fr="Famille" data-en="Family">Famille</div>
+      </div>
+      <div class="room-info">
+        <div class="room-name" data-fr="Suite Familiale" data-en="Family Suite">Suite Familiale</div>
+        <p class="room-desc" data-fr="Deux chambres communicantes, espace jeux pour enfants et kitchenette. Parfaite pour les familles." data-en="Two connecting bedrooms, children's play area and kitchenette. Perfect for families.">Deux chambres communicantes, espace jeux pour enfants et kitchenette. Parfaite pour les familles.</p>
+        <div class="room-features">
+          <span class="feat"><span>🛏️</span> 2 <span data-fr="chambres" data-en="rooms">chambres</span></span>
+          <span class="feat"><span>🍳</span> Kitchenette</span>
+          <span class="feat"><span>🎮</span> <span data-fr="Espace jeux" data-en="Play area">Espace jeux</span></span>
+          <span class="feat"><span>🛡️</span> <span data-fr="Sécurisé" data-en="Secure">Sécurisé</span></span>
+        </div>
+        <div class="room-footer">
+          <div class="room-price">
+            <div class="price-from" data-fr="À partir de" data-en="From">À partir de</div>
+            <div class="price-val">95 000</div>
+            <div class="price-night">XAF / <span data-fr="nuit" data-en="night">nuit</span></div>
+          </div>
+          <button class="btn-reserve" onclick="openReserve('🏠','Suite Familiale','2 Chambres Communicantes','95000')" data-fr="RÉSERVER" data-en="BOOK">RÉSERVER</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-card fade-in">
+      <div class="room-img">
+        <div class="room-bg" style="background:linear-gradient(135deg,#1a2a0d,#101a08)">💼</div>
+        <div class="room-badge" data-fr="Business" data-en="Business">Business</div>
+      </div>
+      <div class="room-info">
+        <div class="room-name" data-fr="Chambre Business" data-en="Business Room">Chambre Business</div>
+        <p class="room-desc" data-fr="Optimisée pour les voyageurs d'affaires. Bureau ergonomique, coffre-fort, accès lounge VIP inclus." data-en="Optimized for business travelers. Ergonomic desk, safe, VIP lounge access included.">Optimisée pour les voyageurs d'affaires. Bureau ergonomique, coffre-fort, accès lounge VIP inclus.</p>
+        <div class="room-features">
+          <span class="feat"><span>💻</span> <span data-fr="Bureau" data-en="Desk">Bureau</span></span>
+          <span class="feat"><span>🔒</span> <span data-fr="Coffre-fort" data-en="Safe">Coffre-fort</span></span>
+          <span class="feat"><span>🥂</span> Lounge VIP</span>
+          <span class="feat"><span>🖨️</span> <span data-fr="Impression" data-en="Printing">Impression</span></span>
+        </div>
+        <div class="room-footer">
+          <div class="room-price">
+            <div class="price-from" data-fr="À partir de" data-en="From">À partir de</div>
+            <div class="price-val">75 000</div>
+            <div class="price-night">XAF / <span data-fr="nuit" data-en="night">nuit</span></div>
+          </div>
+          <button class="btn-reserve" onclick="openReserve('💼','Chambre Business','Lounge VIP inclus','75000')" data-fr="RÉSERVER" data-en="BOOK">RÉSERVER</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="room-card fade-in">
+      <div class="room-img">
+        <div class="room-bg" style="background:linear-gradient(135deg,#2a0d0d,#1a0808)">🌹</div>
+        <div class="room-badge" style="background:#c0392b;color:white" data-fr="Romance" data-en="Romance">Romance</div>
+      </div>
+      <div class="room-info">
+        <div class="room-name" data-fr="Suite Romantique" data-en="Romantic Suite">Suite Romantique</div>
+        <p class="room-desc" data-fr="Un cadre intime et enchanteur avec lit à baldaquin, bain aux pétales de roses et champagne offert." data-en="An intimate and enchanting setting with canopy bed, rose petal bath and complimentary champagne.">Un cadre intime et enchanteur avec lit à baldaquin, bain aux pétales de roses et champagne offert.</p>
+        <div class="room-features">
+          <span class="feat"><span>🌹</span> <span data-fr="Décoration" data-en="Decoration">Décoration</span></span>
+          <span class="feat"><span>🍾</span> Champagne</span>
+          <span class="feat"><span>🛁</span> <span data-fr="Bain spa" data-en="Spa bath">Bain spa</span></span>
+          <span class="feat"><span>🕯️</span> <span data-fr="Romantique" data-en="Romantic">Romantique</span></span>
+        </div>
+        <div class="room-footer">
+          <div class="room-price">
+            <div class="price-from" data-fr="À partir de" data-en="From">À partir de</div>
+            <div class="price-val">120 000</div>
+            <div class="price-night">XAF / <span data-fr="nuit" data-en="night">nuit</span></div>
+          </div>
+          <button class="btn-reserve" onclick="openReserve('🌹','Suite Romantique','Expérience Romance','120000')" data-fr="RÉSERVER" data-en="BOOK">RÉSERVER</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════ SERVICES ═══════════════ -->
+<section id="services">
+  <div class="section-tag" data-fr="Nos Prestations" data-en="Our Amenities">Nos Prestations</div>
+  <h2 class="section-title" data-fr="Services Conçus<br>Pour Vous" data-en="Services Designed<br>For You">Services Conçus<br>Pour Vous</h2>
+  <p class="section-sub" data-fr="Chaque détail est pensé pour que votre séjour soit une expérience inoubliable." data-en="Every detail is crafted to make your stay an unforgettable experience.">Chaque détail est pensé pour que votre séjour soit une expérience inoubliable.</p>
+
+  <div class="services-grid">
+    <div class="service-card fade-in">
+      <span class="service-icon">🍽️</span>
+      <div class="service-name" data-fr="Restaurant Gastronomique" data-en="Gourmet Restaurant">Restaurant Gastronomique</div>
+      <p class="service-desc" data-fr="Cuisine africaine raffinée et internationale, préparée par nos chefs étoilés. Ouvert 7j/7." data-en="Refined African and international cuisine prepared by our award-winning chefs. Open 7 days a week.">Cuisine africaine raffinée et internationale, préparée par nos chefs étoilés. Ouvert 7j/7.</p>
+    </div>
+    <div class="service-card fade-in">
+      <span class="service-icon">🧖</span>
+      <div class="service-name" data-fr="Spa & Bien-être" data-en="Spa & Wellness">Spa & Bien-être</div>
+      <p class="service-desc" data-fr="Massages traditionnels, soins du corps, hammam et piscine thermale pour une détente absolue." data-en="Traditional massages, body treatments, hammam and thermal pool for absolute relaxation.">Massages traditionnels, soins du corps, hammam et piscine thermale pour une détente absolue.</p>
+    </div>
+    <div class="service-card fade-in">
+      <span class="service-icon">🏊</span>
+      <div class="service-name" data-fr="Piscine & Fitness" data-en="Pool & Fitness">Piscine & Fitness</div>
+      <p class="service-desc" data-fr="Piscine olympique en plein air, salle de sport ultra-équipée et cours collectifs chaque matin." data-en="Outdoor Olympic pool, fully-equipped gym and group classes every morning.">Piscine olympique en plein air, salle de sport ultra-équipée et cours collectifs chaque matin.</p>
+    </div>
+    <div class="service-card fade-in">
+      <span class="service-icon">🎪</span>
+      <div class="service-name" data-fr="Événements & Mariages" data-en="Events & Weddings">Événements & Mariages</div>
+      <p class="service-desc" data-fr="Salles de réception modulables jusqu'à 500 personnes. Organisation complète de vos événements." data-en="Flexible reception halls up to 500 guests. Complete event planning service.">Salles de réception modulables jusqu'à 500 personnes. Organisation complète de vos événements.</p>
+    </div>
+    <div class="service-card fade-in">
+      <span class="service-icon">🚗</span>
+      <div class="service-name" data-fr="Navette & Transferts" data-en="Shuttle & Transfers">Navette & Transferts</div>
+      <p class="service-desc" data-fr="Service de voiturier, transferts aéroport et location de véhicules avec chauffeur disponibles 24h/24." data-en="Valet service, airport transfers and chauffeur-driven car hire available 24/7.">Service de voiturier, transferts aéroport et location de véhicules avec chauffeur disponibles 24h/24.</p>
+    </div>
+    <div class="service-card fade-in">
+      <span class="service-icon">👶</span>
+      <div class="service-name" data-fr="Garde d'Enfants" data-en="Childcare">Garde d'Enfants</div>
+      <p class="service-desc" data-fr="Service de baby-sitting professionnel et mini-club avec activités encadrées pour les 3-12 ans." data-en="Professional babysitting service and mini-club with supervised activities for ages 3-12.">Service de baby-sitting professionnel et mini-club avec activités encadrées pour les 3-12 ans.</p>
+    </div>
+    <div class="service-card fade-in">
+      <span class="service-icon">💼</span>
+      <div class="service-name" data-fr="Centre d'Affaires" data-en="Business Center">Centre d'Affaires</div>
+      <p class="service-desc" data-fr="Salles de réunion équipées, visioconférence, secrétariat et services d'impression disponibles." data-en="Equipped meeting rooms, video conferencing, secretarial and printing services available.">Salles de réunion équipées, visioconférence, secrétariat et services d'impression disponibles.</p>
+    </div>
+    <div class="service-card fade-in">
+      <span class="service-icon">🌍</span>
+      <div class="service-name" data-fr="Conciergerie" data-en="Concierge">Conciergerie</div>
+      <p class="service-desc" data-fr="Excursions, réservations restaurants, billets d'avion et toutes vos demandes personnalisées." data-en="Excursions, restaurant bookings, flight tickets and all your personalized requests.">Excursions, réservations restaurants, billets d'avion et toutes vos demandes personnalisées.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TESTIMONIALS ═══════════════ -->
+<section id="testimonials">
+  <div class="testi-container">
+    <div class="section-tag" style="justify-content:center" data-fr="Ce que disent nos clients" data-en="What our guests say">Ce que disent nos clients</div>
+    <h2 class="section-title" style="text-align:center" data-fr="Avis & Témoignages" data-en="Reviews & Testimonials">Avis & Témoignages</h2>
+    <span class="quote-mark">"</span>
+    <div class="testi-text" id="testiText">Grand Palais a transformé notre voyage de noces en un souvenir impérissable. Le service est d'une élégance rare, et chaque attention portée à notre confort nous a profondément touchés.</div>
+    <div class="testi-author">
+      <div class="author-avatar">👤</div>
+      <div class="author-info">
+        <div class="stars" id="testiStars">★★★★★</div>
+        <div class="name" id="testiName">Marie & Paul Nkouatcha</div>
+        <div class="role" id="testiRole">Voyage de noces — Suite Romantique</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:32px">
+      <button onclick="changeTesti(0)" id="dot0" style="width:10px;height:10px;border-radius:50%;background:var(--gold);border:none;cursor:pointer"></button>
+      <button onclick="changeTesti(1)" id="dot1" style="width:10px;height:10px;border-radius:50%;background:rgba(201,168,76,0.3);border:none;cursor:pointer"></button>
+      <button onclick="changeTesti(2)" id="dot2" style="width:10px;height:10px;border-radius:50%;background:rgba(201,168,76,0.3);border:none;cursor:pointer"></button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CONTACT ═══════════════ -->
+<section id="contact">
+  <div class="contact-info">
+    <div class="section-tag" data-fr="Nous Trouver" data-en="Find Us">Nous Trouver</div>
+    <h2 class="section-title" data-fr="Contactez-nous" data-en="Contact Us">Contactez-nous</h2>
+    <p class="section-sub" data-fr="Notre équipe est disponible 24h/24 pour répondre à toutes vos questions." data-en="Our team is available 24/7 to answer all your questions.">Notre équipe est disponible 24h/24 pour répondre à toutes vos questions.</p>
+    <div class="contact-item">
+      <div class="contact-icon">📍</div>
+      <div class="contact-text">
+        <strong data-fr="Adresse" data-en="Address">Adresse</strong>
+        Avenue des Grandes Écoles, Bastos<br>Yaoundé, Cameroun
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon">📞</div>
+      <div class="contact-text">
+        <strong data-fr="Téléphone" data-en="Phone">Téléphone</strong>
+        +237 222 XXX XXX<br>+237 699 XXX XXX
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon">✉️</div>
+      <div class="contact-text">
+        <strong data-fr="Email" data-en="Email">Email</strong>
+        reservation@grandpalais.cm<br>info@grandpalais.cm
+      </div>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon">💳</div>
+      <div class="contact-text">
+        <strong data-fr="Paiements Acceptés" data-en="Accepted Payments">Paiements Acceptés</strong>
+        MTN MoMo · Orange Money · Carte Bancaire · Cash
+      </div>
+    </div>
+  </div>
+  <div class="contact-form">
+    <div class="form-group">
+      <label data-fr="Votre Nom" data-en="Your Name">Votre Nom</label>
+      <input type="text" id="contactName" placeholder="Jean Dupont">
+    </div>
+    <div class="form-group">
+      <label data-fr="Email" data-en="Email">Email</label>
+      <input type="email" id="contactEmail" placeholder="vous@exemple.com">
+    </div>
+    <div class="form-group">
+      <label data-fr="Sujet" data-en="Subject">Sujet</label>
+      <select id="contactSubject">
+        <option data-fr="Réservation" data-en="Reservation">Réservation</option>
+        <option data-fr="Information générale" data-en="General information">Information générale</option>
+        <option data-fr="Événement" data-en="Event">Événement</option>
+        <option data-fr="Réclamation" data-en="Complaint">Réclamation</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label data-fr="Message" data-en="Message">Message</label>
+      <textarea id="contactMsg" rows="4" style="width:100%;background:var(--dark3);border:1px solid rgba(201,168,76,0.2);color:var(--cream);padding:14px;font-family:'Jost',sans-serif;font-size:14px;outline:none;resize:none;" placeholder="..."></textarea>
+    </div>
+    <button class="btn-gold" onclick="sendContact()" data-fr="ENVOYER LE MESSAGE" data-en="SEND MESSAGE">ENVOYER LE MESSAGE</button>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="logo">GRAND <em style="font-style:italic;color:var(--cream)">Palais</em></div>
+      <p data-fr="L'hôtel de référence à Yaoundé. Luxe, confort et authenticité africaine depuis 2012." data-en="Yaoundé's leading hotel. Luxury, comfort and African authenticity since 2012.">L'hôtel de référence à Yaoundé. Luxe, confort et authenticité africaine depuis 2012.</p>
+    </div>
+    <div class="footer-col">
+      <h4 data-fr="Navigation" data-en="Navigation">Navigation</h4>
+      <ul>
+        <li><a onclick="scrollTo('#rooms')" data-fr="Chambres" data-en="Rooms">Chambres</a></li>
+        <li><a onclick="scrollTo('#services')" data-fr="Services" data-en="Services">Services</a></li>
+        <li><a onclick="scrollTo('#testimonials')" data-fr="Avis clients" data-en="Reviews">Avis clients</a></li>
+        <li><a onclick="scrollTo('#contact')" data-fr="Contact" data-en="Contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-fr="Services" data-en="Services">Services</h4>
+      <ul>
+        <li><a data-fr="Restaurant" data-en="Restaurant">Restaurant</a></li>
+        <li><a data-fr="Spa & Piscine" data-en="Spa & Pool">Spa & Piscine</a></li>
+        <li><a data-fr="Événements" data-en="Events">Événements</a></li>
+        <li><a data-fr="Business" data-en="Business">Business</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 data-fr="Paiement" data-en="Payment">Paiement</h4>
+      <ul>
+        <li><a>📱 MTN MoMo</a></li>
+        <li><a>🟠 Orange Money</a></li>
+        <li><a>💳 Carte Bancaire</a></li>
+        <li><a data-fr="💵 Espèces" data-en="💵 Cash">💵 Espèces</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 Grand Palais Hotel — Yaoundé, Cameroun</p>
+    <p data-fr="Conçu avec ❤️ pour l'hospitalité africaine" data-en="Crafted with ❤️ for African hospitality">Conçu avec ❤️ pour l'hospitalité africaine</p>
+  </div>
+</footer>
+
+<script>
+// ─── STATE ───
+let currentLang = 'fr';
+let currentUser = null;
+let selectedRoom = {};
+let selectedPay = 'momo';
+let currentTesti = 0;
+
+// ─── LANGUAGE ───
+function toggleLang() {
+  currentLang = currentLang === 'fr' ? 'en' : 'fr';
+  document.getElementById('langBtn').textContent = currentLang === 'fr' ? 'EN / FR' : 'FR / EN';
+  document.querySelectorAll('[data-fr]').forEach(el => {
+    const txt = el.getAttribute('data-' + currentLang);
+    if (txt) {
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = txt;
+      else el.innerHTML = txt;
+    }
+  });
+  document.documentElement.lang = currentLang;
+}
+
+// ─── MODALS ───
+function openModal(id) {
+  document.getElementById(id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+  document.body.style.overflow = '';
+}
+function switchModal(from, to) {
+  closeModal(from);
+  setTimeout(() => openModal(to), 200);
+}
+
+// Close on overlay click
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeModal(o.id); });
+});
+
+// ─── AUTH ───
+function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const pwd = document.getElementById('loginPwd').value;
+  if (!email || !pwd) { showToast(currentLang === 'fr' ? 'Veuillez remplir tous les champs.' : 'Please fill in all fields.', 'error'); return; }
+  
+  // Simulate login
+  const name = email.split('@')[0];
+  currentUser = { name, email };
+  updateNavUser();
+  closeModal('loginModal');
+  showToast(currentLang === 'fr' ? `Bienvenue, ${name} ! 👋` : `Welcome, ${name}! 👋`, 'success');
+}
+
+function doRegister() {
+  const first = document.getElementById('regFirst').value;
+  const last = document.getElementById('regLast').value;
+  const email = document.getElementById('regEmail').value;
+  const phone = document.getElementById('regPhone').value;
+  const pwd = document.getElementById('regPwd').value;
+  if (!first || !last || !email || !phone || !pwd) {
+    showToast(currentLang === 'fr' ? 'Veuillez remplir tous les champs.' : 'Please fill in all fields.', 'error');
+    return;
+  }
+  currentUser = { name: first + ' ' + last, email, phone };
+  updateNavUser();
+  closeModal('registerModal');
+  showToast(currentLang === 'fr' ? `Compte créé ! Bienvenue, ${first} 🎉` : `Account created! Welcome, ${first} 🎉`, 'success');
+}
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('userBadge').classList.remove('visible');
+  document.getElementById('loginBtn').style.display = '';
+  document.getElementById('registerBtn').style.display = '';
+  document.getElementById('logoutBtn').style.display = 'none';
+  showToast(currentLang === 'fr' ? 'Déconnecté avec succès.' : 'Successfully logged out.');
+}
+
+function updateNavUser() {
+  if (!currentUser) return;
+  const badge = document.getElementById('userBadge');
+  badge.classList.add('visible');
+  document.getElementById('userAvatar').textContent = currentUser.name[0].toUpperCase();
+  document.getElementById('userName').textContent = currentUser.name.split(' ')[0];
+  document.getElementById('loginBtn').style.display = 'none';
+  document.getElementById('registerBtn').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = '';
+}
+
+// ─── RESERVATION ───
+function openReserve(icon, name, type, price) {
+  if (!currentUser) {
+    showToast(currentLang === 'fr' ? 'Veuillez vous connecter pour réserver.' : 'Please sign in to make a reservation.', 'error');
+    setTimeout(() => openModal('loginModal'), 800);
+    return;
+  }
+  selectedRoom = { icon, name, type, price: parseInt(price) };
+  document.getElementById('rIcon').textContent = icon;
+  document.getElementById('rName').textContent = name;
+  document.getElementById('rType').textContent = type;
+  document.getElementById('rPrice').textContent = formatXAF(parseInt(price)) + ' XAF';
+  
+  // Reset to step 1
+  showStep(1);
+  document.getElementById('reserveStep1').style.display = '';
+  document.getElementById('reserveStep2').style.display = 'none';
+  document.getElementById('reserveStep3').style.display = 'none';
+  
+  // Set default dates
+  const today = new Date();
+  const tom = new Date(today); tom.setDate(tom.getDate()+1);
+  const dayAfter = new Date(today); dayAfter.setDate(dayAfter.getDate()+3);
+  document.getElementById('checkIn').value = tom.toISOString().split('T')[0];
+  document.getElementById('checkOut').value = dayAfter.toISOString().split('T')[0];
+  
+  openModal('reserveModal');
+}
+
+function reserveStep2() {
+  const ci = document.getElementById('checkIn').value;
+  const co = document.getElementById('checkOut').value;
+  if (!ci || !co || new Date(co) <= new Date(ci)) {
+    showToast(currentLang === 'fr' ? 'Dates invalides.' : 'Invalid dates.', 'error');
+    return;
+  }
+  // Calculate
+  const nights = Math.ceil((new Date(co) - new Date(ci)) / 86400000);
+  const sub = selectedRoom.price * nights;
+  const tax = Math.round(sub * 0.1925);
+  const total = sub + tax;
+  
+  document.getElementById('subTotal').textContent = formatXAF(sub) + ' XAF';
+  document.getElementById('taxAmt').textContent = formatXAF(tax) + ' XAF';
+  document.getElementById('totalAmt').textContent = formatXAF(total) + ' XAF';
+  
+  showStep(2);
+  document.getElementById('reserveStep1').style.display = 'none';
+  document.getElementById('reserveStep2').style.display = '';
+}
+
+function reserveStep3() {
+  const phone = document.getElementById('payPhone').value;
+  if (!phone || phone.length < 9) {
+    showToast(currentLang === 'fr' ? 'Numéro de téléphone invalide.' : 'Invalid phone number.', 'error');
+    return;
+  }
+  showStep(3);
+  document.getElementById('reserveStep2').style.display = 'none';
+  document.getElementById('reserveStep3').style.display = '';
+  
+  const ref = 'GP-' + Date.now().toString().slice(-6);
+  document.getElementById('confirmRef').textContent = currentLang === 'fr' ? `Référence : ${ref}` : `Reference: ${ref}`;
+  showToast(currentLang === 'fr' ? `Réservation confirmée ! Ref: ${ref}` : `Booking confirmed! Ref: ${ref}`, 'success');
+}
+
+function backStep(n) {
+  if (n === 1) {
+    showStep(1);
+    document.getElementById('reserveStep2').style.display = 'none';
+    document.getElementById('reserveStep1').style.display = '';
+  }
+}
+
+function showStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById('s'+i).style.background = i <= n ? 'var(--gold)' : 'rgba(201,168,76,0.2)';
+  }
+}
+
+function selectPay(type) {
+  selectedPay = type;
+  document.getElementById('momoOpt').classList.toggle('selected', type === 'momo');
+  document.getElementById('orangeOpt').classList.toggle('selected', type === 'orange');
+  document.getElementById('payPhone').placeholder = type === 'momo' ? '6XX XXX XXX (MTN)' : '6XX XXX XXX (Orange)';
+}
+
+// ─── SEARCH ───
+function doSearch() {
+  const ci = document.getElementById('qCheckIn').value;
+  const co = document.getElementById('qCheckOut').value;
+  if (!ci || !co) { showToast(currentLang === 'fr' ? 'Veuillez entrer vos dates.' : 'Please enter your dates.', 'error'); return; }
+  scrollTo('#rooms');
+  showToast(currentLang === 'fr' ? `${document.getElementById('rooms').querySelectorAll('.room-card').length} chambres disponibles` : `${document.getElementById('rooms').querySelectorAll('.room-card').length} rooms available`, 'success');
+}
+
+// ─── TESTIMONIALS ───
+const testis = [
+  {
+    fr: { text: "Grand Palais a transformé notre voyage de noces en un souvenir impérissable. Le service est d'une élégance rare, et chaque attention portée à notre confort nous a profondément touchés.", name: "Marie & Paul Nkouatcha", role: "Voyage de noces — Suite Romantique" },
+    en: { text: "Grand Palais transformed our honeymoon into an unforgettable memory. The service is of rare elegance, and every attention to our comfort truly touched us.", name: "Marie & Paul Nkouatcha", role: "Honeymoon — Romantic Suite" }
+  },
+  {
+    fr: { text: "En tant que voyageur d'affaires fréquent, j'ai séjourné dans de nombreux hôtels à travers l'Afrique. Grand Palais se distingue par la qualité de ses équipements et la réactivité de son équipe.", name: "Ibrahim Al-Farsi", role: "Client régulier — Chambre Business" },
+    en: { text: "As a frequent business traveler, I've stayed in many hotels across Africa. Grand Palais stands out for the quality of its facilities and the responsiveness of its team.", name: "Ibrahim Al-Farsi", role: "Regular guest — Business Room" }
+  },
+  {
+    fr: { text: "Nous avons organisé notre conférence annuelle à Grand Palais. Les salles de réunion sont impeccables et le service traiteur était à la hauteur de notre réputation internationale.", name: "Dr. Françoise Mbassi", role: "Directrice — ONG Santé Africa" },
+    en: { text: "We organized our annual conference at Grand Palais. The meeting rooms are impeccable and the catering service matched our international reputation.", name: "Dr. Françoise Mbassi", role: "Director — ONG Santé Africa" }
+  }
+];
+
+function changeTesti(i) {
+  currentTesti = i;
+  const t = testis[i][currentLang] || testis[i]['fr'];
+  document.getElementById('testiText').textContent = t.text;
+  document.getElementById('testiName').textContent = t.name;
+  document.getElementById('testiRole').textContent = t.role;
+  [0,1,2].forEach(j => {
+    document.getElementById('dot'+j).style.background = j === i ? 'var(--gold)' : 'rgba(201,168,76,0.3)';
+  });
+}
+// Auto rotate
+setInterval(() => changeTesti((currentTesti + 1) % 3), 5000);
+
+// ─── CONTACT ───
+function sendContact() {
+  const name = document.getElementById('contactName').value;
+  const email = document.getElementById('contactEmail').value;
+  const msg = document.getElementById('contactMsg').value;
+  if (!name || !email || !msg) { showToast(currentLang === 'fr' ? 'Veuillez remplir tous les champs.' : 'Please fill in all fields.', 'error'); return; }
+  showToast(currentLang === 'fr' ? 'Message envoyé ! Nous vous répondrons sous 24h.' : 'Message sent! We will reply within 24 hours.', 'success');
+  document.getElementById('contactName').value = '';
+  document.getElementById('contactEmail').value = '';
+  document.getElementById('contactMsg').value = '';
+}
+
+// ─── UTILS ───
+function formatXAF(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function scrollTo(sel) {
+  document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── NAVBAR SCROLL ───
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('navbar');
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ─── FADE IN ───
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ─── SET TODAY DATE ───
+const t = new Date();
+document.getElementById('qCheckIn').value = t.toISOString().split('T')[0];
+const t2 = new Date(t); t2.setDate(t2.getDate()+2);
+document.getElementById('qCheckOut').value = t2.toISOString().split('T')[0];
+</script>
+</body>
+</html>
